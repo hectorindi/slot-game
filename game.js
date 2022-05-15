@@ -1,4 +1,12 @@
-// new App created
+/**
+ * Calculate age
+ * @param {number} current Current year
+ * @param {number} yearOfBirth Year of Birth
+ * @returns {string} your calculated age
+ */
+/**
+ * new App created
+ */
 const app = new PIXI.Application({
   width: 1920,
   height: 1080,
@@ -7,7 +15,9 @@ const app = new PIXI.Application({
   resizeTo: window,
 });
 
-// adding basic containers
+/**
+ * adding basic containers
+ */
 document.body.appendChild(app.view);
 const mainContainer = new PIXI.Container();
 app.stage.addChild(mainContainer);
@@ -19,7 +29,9 @@ const winText = new PIXI.Text();
 app.stage.addChild(winText);
 mainContainer.scale.set(0.5);
 
-// define game variables
+/**
+ * define game variables
+ */
 const SYMBOL_HEIGHT = 256;
 const SYMBOL_WIDTH = 256;
 const numReels = 5;
@@ -162,7 +174,9 @@ const payOuts = {
 let reelSymbols = [];
 let grid = [[], [], [], [], []];
 
-// preloading assets
+/**
+ * preloading assets
+ */
 const loader = new PIXI.Loader();
 
 // Chainable `add` to enqueue a resource
@@ -177,15 +191,15 @@ loader
   .add("lv3_symbol", "assets/lv3_symbol.png")
   .add("lv4_symbol", "assets/lv4_symbol.png");
 
-loader.load((loader, resources) => {});
+loader.load();
 
-// throughout the process multiple signals can be dispatched.
 loader.onProgress.add((e) => {
   console.log(" Progress ", parseInt(e.progress));
+  // called on progress , update progress text
   loadingText.text = `Loading assets ... \n PROGRESS ${parseInt(e.progress)}`;
   loadingText.x = app.screen.width / 2;
   loadingText.y = app.screen.height / 2;
-}); // called once per loaded/errored file
+});
 loader.onError.add(() => {}); // called once per errored file
 loader.onLoad.add(() => {}); // called once per loaded file
 loader.onComplete.add(() => {
@@ -194,7 +208,9 @@ loader.onComplete.add(() => {
   startGame();
 });
 
-// Starting game with a default stop position
+/**
+ * Starting game with a default stop position
+ */
 function startGame() {
   let defaultPos = [0, 0, 0, 0, 0];
   for (let count = 0; count < numReels; count++) {
@@ -204,7 +220,9 @@ function startGame() {
   resize();
 }
 
-//creating Spin button
+/**
+ * creating Spin button
+ */
 function createSpinButton() {
   const texture = PIXI.Texture.from(`assets/spin_button.png`);
   const button = new PIXI.Sprite(texture);
@@ -216,30 +234,36 @@ function createSpinButton() {
   button.on("pointerdown", onButtonDown);
 }
 
+/**
+ *  Generate a radom position from the reel and update the visible grid
+ */
 function onButtonDown(evt) {
   winText.text = "";
   reelSymbols.forEach((elem) => elem.parent && elem.parent.removeChild(elem));
-  let posOnreels = [0, 11, 1, 10, 14]; // a quick check for result
-  // let posOnreels = [
-  //   randomIntFromInterval(0, reelStrips[0].length - 1),
-  //   randomIntFromInterval(0, reelStrips[1].length - 1),
-  //   randomIntFromInterval(0, reelStrips[2].length - 1),
-  //   randomIntFromInterval(0, reelStrips[3].length - 1),
-  //   randomIntFromInterval(0, reelStrips[4].length - 1),
-  // ];
+  // let posOnreels = [0, 11, 1, 10, 14]; // a quick check for result
+  let posOnreels = [
+    randomIntFromInterval(0, reelStrips[0].length - 1),
+    randomIntFromInterval(0, reelStrips[1].length - 1),
+    randomIntFromInterval(0, reelStrips[2].length - 1),
+    randomIntFromInterval(0, reelStrips[3].length - 1),
+    randomIntFromInterval(0, reelStrips[4].length - 1),
+  ];
   // create updated reels grid
   for (let count = 0; count < numReels; count++) {
     createReel(posOnreels[count], count);
   }
   // calculate wins based on grid
-  let winings = calculateWins(posOnreels);
+  let winings = calculateWins();
   console.log(posOnreels);
   console.log(grid);
   // show wins based on grid
   showWinnings(winings);
 }
 
-// creaing win text shown based on winning
+/**
+ * creaing win text shown based on winning
+ * @param {winings} winings winning object holds win lines and total wins
+ */
 function showWinnings(winings) {
   if (winings.totalWins > 0) {
     winText.text = "Total Wins : " + winings.totalWins + "\n";
@@ -257,7 +281,11 @@ function showWinnings(winings) {
 // Listen for animate update
 app.ticker.add((delta) => {});
 
-// create grid based on reels provided
+/**
+ * creaing win text shown based on winning
+ * @param {stopPosition} stopPosition stopPosition in the reel
+ * @param {index} index reel index to be created
+ */
 function createReel(stopPosition, index) {
   grid[index] = [];
   for (let count = 0; count < visibleSymbols; count++) {
@@ -279,17 +307,28 @@ function createReel(stopPosition, index) {
   }
 }
 
+/**
+ * returns random number from a min and max range
+ * @param {min} min minimum number of the limit
+ * @param {max} max maximum number of the limit
+ */
 function randomIntFromInterval(min, max) {
   // min and max included
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+/**
+ * returns random number from a min and max range
+ * @param {min} min minimum number of the limit
+ * @param {max} max maximum number of the limit
+ */
 function calculateWins() {
-  // calculating wins
+  // create win object
   let winObj = { lines: [], totalWins: 0 };
   for (let payLineIndex = 0; payLineIndex < paylines.length; payLineIndex++) {
     const payline = paylines[payLineIndex];
     const firstSymbol = grid[0][payline[0]];
+    // create line object
     let line = { pos: [], type: "" };
     for (let coulmnIndex = 0; coulmnIndex < payline.length; coulmnIndex++) {
       let currentSymbol = grid[coulmnIndex][payline[coulmnIndex]];
@@ -299,6 +338,7 @@ function calculateWins() {
         break;
       }
     }
+    // if win is detected push to winnings object
     if (line.pos.length > 0 && line.pos.length > 2) {
       line.type = `x${line.pos.length}`;
       line.symbol = firstSymbol;
@@ -310,7 +350,9 @@ function calculateWins() {
   }
   return winObj;
 }
-
+/**
+ * position the game elemet to correct position on window resize
+ */
 function resize() {
   // Move container to the center
   mainContainer.x = app.screen.width / 2;
